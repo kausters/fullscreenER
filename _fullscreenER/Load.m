@@ -31,23 +31,6 @@ struct CGRect _currentFrame;
 + (void)load {
     osx_ver = [[NSProcessInfo processInfo] operatingSystemVersion].minorVersion;
     NSLog(@"OS X 10.%ld, _fullscreenER loaded...", (long)osx_ver);
-    
-    NSApplication *application = [NSApplication sharedApplication];
-    if (application.windows)
-    {
-        for (NSWindow *win in application.windows)
-        {
-            win.styleMask = win.styleMask | NSResizableWindowMask;
-            /*
-             NSClosableWindowMask |
-             NSTitledWindowMask |
-             NSMiniaturizableWindowMask |
-             NSTexturedBackgroundWindowMask |
-             NSResizableWindowMask |
-             NSFullSizeContentViewWindowMask;
-             */
-        }
-    }
 
 //    for (NSWindow *window in application.windows)
 //    {
