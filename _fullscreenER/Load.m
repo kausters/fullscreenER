@@ -10,10 +10,10 @@
 #import "ZKSwizzle.h"
 @import AppKit;
 
-BOOL _isMaximized = NO;
 BOOL _willMaximize = NO;
 NSInteger osx_ver;
 struct CGRect _cachedFrame;
+struct CGRect _currentFrame;
 
 //@implementation NSView (ViewHierarchyLogging)
 //- (void)logViewHierarchy
@@ -131,23 +131,20 @@ ZKSwizzleInterface(_Maximize_NSWindow, NSWindow, NSResponder);
     NSWindow *this = (NSWindow*)self;
     
     if ([this _inFullScreen]) {
-        
+
         [this toggleFullScreen:this];
         
     } else {
+        CGRect futureFrame = osx_ver < 11 ? [this _frameForFullScreenMode] : [this _tileFrameForFullScreen];
+        CGRect screenFrame = this.screen.visibleFrame;
+        _currentFrame = this.frame;
         
-        if (!_isMaximized) {
-            _isMaximized = YES;
+        Boolean isMaximized = CGRectEqualToRect(_currentFrame, screenFrame);
+        
+        if (!isMaximized) {
             _cachedFrame = this.frame;
-            if (osx_ver < 11) {
-                // 10.10
-                [this setFrame:[this _frameForFullScreenMode] display:true animate:true];
-            } else {
-                // 10.11+
-                [this setFrame:[this _tileFrameForFullScreen] display:true animate:true];
-            }
+            [this setFrame:futureFrame display:true animate:true];
         } else {
-            _isMaximized = NO;
             [this setFrame:_cachedFrame display:true animate:true];
         }
         
