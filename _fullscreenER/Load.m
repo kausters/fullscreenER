@@ -12,8 +12,9 @@
 
 BOOL _willMaximize = NO;
 NSInteger osx_ver;
-struct CGRect _cachedFrame;
 struct CGRect _currentFrame;
+
+static void *cachedFrame = &cachedFrame;
 
 //@implementation NSView (ViewHierarchyLogging)
 //- (void)logViewHierarchy
@@ -125,10 +126,15 @@ ZKSwizzleInterface(_Maximize_NSWindow, NSWindow, NSResponder);
         Boolean isMaximized = CGRectEqualToRect(_currentFrame, screenFrame);
         
         if (!isMaximized) {
-            _cachedFrame = this.frame;
+            NSValue *cachedFrameValue = [NSValue valueWithRect:(NSRect)NSRectFromCGRect(_currentFrame)];
+            objc_setAssociatedObject(this, cachedFrame, cachedFrameValue, OBJC_ASSOCIATION_RETAIN);
+            
             [this setFrame:futureFrame display:true animate:true];
         } else {
-            [this setFrame:_cachedFrame display:true animate:true];
+            NSValue *cachedValue = objc_getAssociatedObject(this, cachedFrame);
+            CGRect cachedFrame = NSRectToCGRect(cachedValue.rectValue);
+            
+            [this setFrame:cachedFrame display:true animate:true];
         }
         
     }
